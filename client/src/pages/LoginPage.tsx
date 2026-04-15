@@ -123,14 +123,21 @@ const LoginPage: React.FC = () => {
           </div>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-sm font-bold text-surface-400 hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="text-sm font-bold text-surface-400 hover:text-white transition-colors">Pricing</a>
             <a href="#gallery" className="text-sm font-bold text-surface-400 hover:text-white transition-colors">Gallery</a>
-            <a href="#location" className="text-sm font-bold text-surface-400 hover:text-white transition-colors">Location</a>
+            <a
+              href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-black hover:bg-white/10 transition-all flex items-center gap-2"
+            >
+              <MdLocationOn className="text-primary-400" /> Locate
+            </a>
             <button
               onClick={scrollToBooking}
-              className="px-6 py-2.5 rounded-full bg-white text-surface-950 text-sm font-black hover:bg-primary-400 hover:text-white transition-all transform hover:scale-105 active:scale-95"
+              className="px-6 py-2.5 rounded-full bg-white text-surface-950 text-sm font-black hover:bg-primary-400 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-white/10"
             >
               Book Now
             </button>
@@ -153,15 +160,22 @@ const LoginPage: React.FC = () => {
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg text-sm font-bold text-surface-300 hover:bg-white/5">Features</a>
               <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg text-sm font-bold text-surface-300 hover:bg-white/5">Pricing</a>
               <a href="#gallery" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg text-sm font-bold text-surface-300 hover:bg-white/5">Gallery</a>
-              <a href="#location" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg text-sm font-bold text-surface-300 hover:bg-white/5">Location</a>
-              <button onClick={scrollToBooking} className="mt-2 w-full btn-primary py-3 rounded-xl text-sm font-black">Book Now</button>
+              <a
+                href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mx-4 mt-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <MdLocationOn className="text-primary-400" /> Locate Us
+              </a>
+              <button onClick={scrollToBooking} className="mx-4 mt-1 btn-primary py-3 rounded-xl text-sm font-black text-center">Book Now</button>
             </div>
           </div>
         )}
       </nav>
 
       {/* ═══ HERO SECTION ═══ */}
-      <section className="relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 px-4 sm:px-6 overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center pt-8 sm:pt-12 px-4 sm:px-6 overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 z-0">
           <img src="/images/hero_turf.png" alt="VSY Turf" className="w-full h-full object-cover scale-105" />
@@ -194,26 +208,15 @@ const LoginPage: React.FC = () => {
                   {role === 'admin' ? 'Admin Dashboard' : 'Go to Dashboard'} <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
                 </Link>
               ) : (
-                <button
-                  onClick={scrollToBooking}
-                  className="btn-primary px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center"
+                <a
+                  href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center transition-all"
                 >
-                  Get Started <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
-                </button>
+                  <MdLocationOn className="text-primary-400" size={22} /> Locate Us
+                </a>
               )}
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2.5">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border-3 sm:border-4 border-surface-950 bg-surface-800 overflow-hidden">
-                      <img src={`https://i.pravatar.cc/150?u=${i}`} className="w-full h-full object-cover" alt="User" />
-                    </div>
-                  ))}
-                </div>
-                <div className="pl-2">
-                  <p className="text-xs sm:text-sm font-black text-white">5,000+</p>
-                  <p className="text-[9px] sm:text-[10px] text-surface-500 font-bold uppercase">Players</p>
-                </div>
-              </div>
             </div>
           </div>
 
