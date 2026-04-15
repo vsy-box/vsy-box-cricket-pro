@@ -92,14 +92,16 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface CreateOrderResponse {
-  bookingId: string;
+  bookingIds: string[];
   orderId: string;
   amount: number;
   currency: string;
   razorpayKeyId: string;
   turfId: TurfId;
   date: string;
-  startHour: number;
+  startHours: number[];
+  paymentType: 'full' | 'advance';
+  totalBookingAmount: number;
 }
 
 export interface LockSlotResponse {

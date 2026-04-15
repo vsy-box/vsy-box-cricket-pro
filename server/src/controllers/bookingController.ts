@@ -75,7 +75,8 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     const amountToPay = paymentType === 'advance' ? Math.round(totalBookingAmount * 0.3) : totalBookingAmount;
 
     // Create Razorpay order for the amount to pay
-    const bookingRef = `VSY-${turfId}-${date}-${hours.join('_')}-${Date.now()}`;
+    // Shorten bookingRef to stay under Razorpay's 40-char limit for receipt
+    const bookingRef = `VSY-${turfId}-${Date.now().toString(36)}`;
     const order = await createOrder(amountToPay, bookingRef);
 
     // Create multiple pending bookings

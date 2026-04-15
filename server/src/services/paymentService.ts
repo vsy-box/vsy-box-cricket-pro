@@ -41,7 +41,7 @@ export const createOrder = async (
   } catch (error) {
     const err = error as Error;
     // If not configured, return a mock order for demo purposes
-    if (err.message === 'RAZORPAY_NOT_CONFIGURED' || err.message.includes('Auth Error')) {
+    if (err.message === 'RAZORPAY_NOT_CONFIGURED' || (err.message && err.message.includes('Auth Error'))) {
       console.warn('⚠️ Razorpay not configured correctly. Using DEMO order ID.');
       return {
         orderId: `order_DEMO_${Math.random().toString(36).slice(2, 11)}`,
