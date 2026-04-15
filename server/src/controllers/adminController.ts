@@ -410,29 +410,36 @@ export const getPricingRules = async (_req: Request, res: Response): Promise<voi
   try {
     let rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
     
-    // If no rules exist, create defaults immediately and return them
+    // If rules are missing, generate them one by one (safer for cloud DBs)
     if (rules.length < 8) {
+      console.log('🌱 Checking/Generating missing pricing rules...');
       const turfs: ('A' | 'B')[] = ['A', 'B'];
-      const defaultRules = [];
-      
-      // Clear if corrupted/incomplete
-      await PricingRule.deleteMany({});
+      const dayTypes: ('weekday' | 'weekend')[] = ['weekday', 'weekend'];
       
       for (const turfId of turfs) {
-        defaultRules.push({ turfId, dayType: 'weekday', startHour: 6, endHour: 16, price: 800 });
-        defaultRules.push({ turfId, dayType: 'weekday', startHour: 16, endHour: 24, price: 1200 });
-        defaultRules.push({ turfId, dayType: 'weekend', startHour: 6, endHour: 16, price: 1000 });
-        defaultRules.push({ turfId, dayType: 'weekend', startHour: 16, endHour: 24, price: 1500 });
+        for (const dayType of dayTypes) {
+          // Check for Morning Rule (6-16)
+          const morningExists = rules.find(r => r.turfId === turfId && r.dayType === dayType && r.startHour === 6);
+          if (!morningExists) {
+            await PricingRule.create({ turfId, dayType, startHour: 6, endHour: 16, price: dayType === 'weekday' ? 800 : 1000 });
+          }
+          
+          // Check for Evening Rule (16-24)
+          const eveningExists = rules.find(r => r.turfId === turfId && r.dayType === dayType && r.startHour === 16);
+          if (!eveningExists) {
+            await PricingRule.create({ turfId, dayType, startHour: 16, endHour: 24, price: dayType === 'weekday' ? 1200 : 1500 });
+          }
+        }
       }
-      
-      const seeded = await PricingRule.insertMany(defaultRules);
-      rules = seeded as any;
-      console.log('✅ Pricing rules auto-generated on-demand');
+      // Re-fetch now that they are created
+      rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
+      console.log('✅ Pricing table verified and filled');
     }
     
     res.status(200).json({ success: true, data: rules });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to get rules' });
+    console.error('Pricing Fetch Error:', error);
+    res.status(500).json({ success: false, message: 'Pricing system initialization failed' });
   }
 };
 
