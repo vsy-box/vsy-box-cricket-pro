@@ -32,7 +32,7 @@ export const getSlotsForDate = async (
     Booking.find({
       turfId,
       date: dateStr,
-      status: 'confirmed',
+      status: { $in: ['confirmed', 'pending'] },
     }).lean(),
     SlotLock.find({
       turfId,
@@ -89,7 +89,7 @@ export const lockSlot = async (
       turfId,
       date: dateStr,
       startHour,
-      status: 'confirmed',
+      status: { $in: ['confirmed', 'pending'] },
     }),
     BlockedSlot.findOne({
       turfId,
@@ -171,7 +171,7 @@ export const isSlotAvailable = async (
       turfId,
       date: dateStr,
       startHour,
-      status: 'confirmed',
+      status: { $in: ['confirmed', 'pending'] },
     }),
     BlockedSlot.findOne({
       turfId,
