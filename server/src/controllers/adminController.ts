@@ -18,10 +18,10 @@ const calculatePrice = (slot: { turfId: string; date: string; startHour: number 
   })();
   const dayType = isWeekend ? 'weekend' : 'weekday';
 
-  const matchingRule = rules.find(r => 
+  const matchingRule = rules.find(r =>
     r.turfId === slot.turfId &&
-    r.dayType === dayType && 
-    (r.startHour <= r.endHour 
+    r.dayType === dayType &&
+    (r.startHour <= r.endHour
       ? (slot.startHour >= r.startHour && slot.startHour < r.endHour)
       : (slot.startHour >= r.startHour || slot.startHour < r.endHour))
   );
@@ -42,7 +42,7 @@ const calculatePrice = (slot: { turfId: string; date: string; startHour: number 
  */
 export const getAllBookings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { date, turfId, status, search, page = '1', limit = '6' } = req.query;
+    const { date, turfId, status, search, page = '1', limit = '8' } = req.query;
 
     // Cleanup expired pending bookings globally
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -55,7 +55,7 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
     if (date && typeof date === 'string') filter.date = date;
     if (turfId && typeof turfId === 'string') filter.turfId = turfId;
     if (status && typeof status === 'string') filter.status = status;
-    
+
     // Add search mapping for User references
     if (search && typeof search === 'string' && search.trim() !== '') {
       const users = await User.find({
@@ -64,7 +64,7 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
           { phone: { $regex: search, $options: 'i' } }
         ]
       }).select('_id');
-      
+
       if (users.length > 0) {
         filter.userId = { $in: users.map(u => u._id) };
       } else {
@@ -93,7 +93,7 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
       const blockedFilter: any = {};
       if (date && typeof date === 'string') blockedFilter.date = date;
       if (turfId && typeof turfId === 'string') blockedFilter.turfId = turfId;
-      
+
       if (search && typeof search === 'string' && search.trim() !== '') {
         blockedFilter.$or = [
           { customerName: { $regex: search, $options: 'i' } },
@@ -107,40 +107,40 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
         PricingRule.find({ isActive: true }).lean()
       ]);
 
-    // Transform blocked slots to look like bookings
-    extraRecords = blockedSlots.map(bs => {
-      const price = calculatePrice(bs, pricingRules);
-      
-      // Try to get customer info from explicit fields or extract from reason field
-      let resolvedName = bs.customerName || '';
-      let resolvedPhone = bs.phoneNumber || '';
-      
-      // Extract name from old-style "Walk-in: [Name]" reason field
-      if (!resolvedName && bs.reason && bs.reason.startsWith('Walk-in: ')) {
-        resolvedName = bs.reason.replace('Walk-in: ', '').trim();
-      }
-      
-      const hasCustomerInfo = !!(resolvedName || resolvedPhone);
-      
-      return {
-        ...bs,
-        status: 'blocked',
-        userId: hasCustomerInfo 
-          ? { name: resolvedName || 'Walk-in Customer', phone: resolvedPhone }
-          : null,
-        reason: bs.reason,
-        totalAmount: price,
-        paidAmount: price,
-        paymentType: 'full',
-        isBlocked: true,
-        isAdminBooked: hasCustomerInfo // flag to distinguish from maintenance block
-      };
-    });
+      // Transform blocked slots to look like bookings
+      extraRecords = blockedSlots.map(bs => {
+        const price = calculatePrice(bs, pricingRules);
+
+        // Try to get customer info from explicit fields or extract from reason field
+        let resolvedName = bs.customerName || '';
+        let resolvedPhone = bs.phoneNumber || '';
+
+        // Extract name from old-style "Walk-in: [Name]" reason field
+        if (!resolvedName && bs.reason && bs.reason.startsWith('Walk-in: ')) {
+          resolvedName = bs.reason.replace('Walk-in: ', '').trim();
+        }
+
+        const hasCustomerInfo = !!(resolvedName || resolvedPhone);
+
+        return {
+          ...bs,
+          status: 'blocked',
+          userId: hasCustomerInfo
+            ? { name: resolvedName || 'Walk-in Customer', phone: resolvedPhone }
+            : null,
+          reason: bs.reason,
+          totalAmount: price,
+          paidAmount: price,
+          paymentType: 'full',
+          isBlocked: true,
+          isAdminBooked: hasCustomerInfo // flag to distinguish from maintenance block
+        };
+      });
     }
 
     // Combine and sort (for page 1 simplicity, ideally we'd use aggregation for true combined pagination)
     let combinedResults = [...bookings, ...extraRecords];
-    
+
     // Sort combined by date and hour ascending
     combinedResults.sort((a, b) => {
       const dateA = a.date + (a.startHour < 10 ? '0' : '') + a.startHour;
@@ -263,7 +263,7 @@ export const blockSlot = async (req: Request, res: Response): Promise<void> => {
       reason: reason || 'Admin Block',
       blockedBy: new mongoose.Types.ObjectId(adminId),
     });
-    
+
     res.status(201).json({ success: true, message: 'Slot blocked successfully', data: blocked });
   } catch (error) {
     console.error('Block slot error:', error);
@@ -294,7 +294,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     const today = `${year}-${month}-${day}`;
-    
+
     // Extract filters
     const { month: qMonth, year: qYear, showAll, date: qDate } = req.query;
     let dateFilter: any = {};
@@ -341,13 +341,13 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     ]);
 
     const [totalBookings, confirmedBookings, todayBookings, totalUsers, totalBlocked, todayBlocked, revenueResult, turfRevenueResult] = statsResult;
-    
+
     // Parse revenue and counts result
     let onlineRevenue = 0;
     let walkinRevenue = 0;
     let onlineCount = 0;
     let walkinCount = 0;
-    
+
     revenueResult.forEach((res: any) => {
       if (res._id === 'walkin') {
         walkinRevenue += res.total;
@@ -409,20 +409,20 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
 export const getPricingRules = async (_req: Request, res: Response): Promise<void> => {
   try {
     let rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
-    
+
     // Force update if the timings are not the new 6-6 blocks
     const needsUpdate = rules.length < 8 || rules.some((r: any) => r.endHour !== 18 && r.endHour !== 6);
-    
+
     if (needsUpdate) {
       console.log('🔄 Pricing timings are outdated or missing. Force-repairing rules...');
       const turfs: ('A' | 'B')[] = ['A', 'B'];
       const dayTypes: ('weekday' | 'weekend')[] = ['weekday', 'weekend'];
-      
+
       for (const turfId of turfs) {
         for (const dayType of dayTypes) {
           // Day Rule (6-18)
           await PricingRule.create({ turfId, dayType, startHour: 6, endHour: 18, price: dayType === 'weekday' ? 800 : 1000 });
-          
+
           // Night Rule (18-6)
           await PricingRule.create({ turfId, dayType, startHour: 18, endHour: 6, price: dayType === 'weekday' ? 1200 : 1500 });
         }
@@ -431,7 +431,7 @@ export const getPricingRules = async (_req: Request, res: Response): Promise<voi
       rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
       console.log('✅ Pricing table verified and filled');
     }
-    
+
     res.status(200).json({ success: true, data: rules });
   } catch (error) {
     console.error('Pricing Fetch Error:', error);
@@ -459,7 +459,7 @@ export const updatePricingRule = async (req: Request, res: Response): Promise<vo
 export const migrateWalkIns = async (_req: Request, res: Response): Promise<void> => {
   try {
     const oldWalkIns = await BlockedSlot.find({ phoneNumber: { $exists: true, $ne: '' } }).lean();
-    
+
     let migrated = 0;
     let skipped = 0;
     const errors: string[] = [];
