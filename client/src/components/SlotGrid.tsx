@@ -34,6 +34,8 @@ const SlotGrid: React.FC<SlotGridProps> = ({ slots, turfId, selectedSlotHours, o
         return <MdBlock className="text-surface-500" size={14} />;
       case 'locked':
         return <MdLock className="text-amber-400" size={14} />;
+      case 'pending':
+        return <MdLock className="text-orange-400 animate-pulse" size={14} />;
       default:
         return null;
     }
@@ -53,6 +55,8 @@ const SlotGrid: React.FC<SlotGridProps> = ({ slots, turfId, selectedSlotHours, o
         return 'Blocked';
       case 'locked':
         return 'Held';
+      case 'pending':
+        return 'Pending...';
       default:
         return '';
     }
@@ -89,6 +93,10 @@ const SlotGrid: React.FC<SlotGridProps> = ({ slots, turfId, selectedSlotHours, o
           <div className="w-3 h-3 rounded-sm bg-surface-600/30 border border-surface-500/50" />
           <span className="text-xs text-surface-400">Blocked</span>
         </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-orange-500/30 border border-orange-500/50 animate-pulse" />
+          <span className="text-xs text-surface-400">Payment Pending</span>
+        </div>
       </div>
 
       {/* Grid */}
@@ -108,6 +116,7 @@ const SlotGrid: React.FC<SlotGridProps> = ({ slots, turfId, selectedSlotHours, o
                     : 'slot-available hover:scale-[1.03]' 
                   : ''}
                 ${slot.status === 'booked' ? 'slot-booked' : ''}
+                ${slot.status === 'pending' ? 'bg-orange-500/10 border-orange-500/30 ring-1 ring-orange-500/20' : ''}
                 ${slot.status === 'blocked' ? 'slot-blocked' : ''}
                 ${slot.status === 'locked' ? 'slot-locked' : ''}
               `}

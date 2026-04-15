@@ -1,5 +1,5 @@
 export type TurfId = 'A' | 'B';
-export type SlotStatus = 'available' | 'booked' | 'blocked' | 'locked';
+export type SlotStatus = 'available' | 'booked' | 'blocked' | 'locked' | 'pending';
 
 export interface User {
   id: string;

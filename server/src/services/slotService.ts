@@ -46,7 +46,6 @@ export const getSlotsForDate = async (
     getAllSlotPrices(dateStr, turfId),
   ]);
 
-  const bookedHours = new Set(bookedSlots.map((b) => b.startHour));
   const lockedHours = new Set(lockedSlots.map((l) => l.startHour));
   const blockedHours = new Set(blockedSlots.map((b) => b.startHour));
 
@@ -55,10 +54,16 @@ export const getSlotsForDate = async (
   for (let hour = 0; hour < 24; hour++) {
     let status: SlotInfo['status'] = 'available';
 
+    const hourBookings = bookedSlots.filter(b => b.startHour === hour);
+    const hasConfirmed = hourBookings.some(b => b.status === 'confirmed');
+    const hasPending = hourBookings.some(b => b.status === 'pending');
+
     if (blockedHours.has(hour)) {
       status = 'blocked';
-    } else if (bookedHours.has(hour)) {
+    } else if (hasConfirmed) {
       status = 'booked';
+    } else if (hasPending) {
+      status = 'pending';
     } else if (lockedHours.has(hour)) {
       status = 'locked';
     }

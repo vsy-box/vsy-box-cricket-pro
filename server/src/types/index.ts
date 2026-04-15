@@ -76,7 +76,7 @@ export interface IPricingRule {
 export interface SlotInfo {
   hour: number;
   timeLabel: string;
-  status: 'available' | 'booked' | 'blocked' | 'locked';
+  status: 'available' | 'booked' | 'blocked' | 'locked' | 'pending';
   price: number;
 }
 
