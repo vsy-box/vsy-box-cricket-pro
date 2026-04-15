@@ -695,7 +695,7 @@ const AdminDashboard: React.FC = () => {
                             <div className="flex-1 min-w-0">
                               <p className="text-xs sm:text-sm font-bold text-white truncate">{user?.name || user?.phone || 'Guest'}</p>
                               <p className="text-[10px] sm:text-xs text-surface-500 truncate">
-                                Turf {booking.turfId} · {formatDate(booking.date)} · {booking.startHours?.length > 1 ? `${booking.startHours.length} Slots: ` : ''}{formatHour(booking.startHours?.[0] ?? booking.startHour)} - {formatHour(booking.endHour ?? booking.startHour + 1)}
+                                Turf {booking.turfId} · {formatDate(booking.date)} · {(booking.startHours?.length ?? 0) > 1 ? `${booking.startHours?.length} Slots: ` : ''}{formatHour(booking.startHours?.[0] ?? booking.startHour)} - {formatHour(booking.endHour ?? booking.startHour + 1)}
                               </p>
                             </div>
                             <div className="text-right flex-shrink-0">
@@ -869,7 +869,7 @@ const AdminDashboard: React.FC = () => {
                               Turf {b.turfId}
                             </span>
                             <span className="text-surface-400">{formatDate(b.date)}</span>
-                            <span className="text-primary-400 font-bold">{b.startHours?.length > 1 ? `${b.startHours.length} Slots: ` : ''} {formatHour(b.startHours[0])} - {formatHour(b.endHour)}</span>
+                            <span className="text-primary-400 font-bold">{(b.startHours?.length ?? 0) > 1 ? `${b.startHours?.length} Slots: ` : ''} {formatHour(b.startHours?.[0] ?? b.startHour)} - {formatHour(b.endHour ?? b.startHour + 1)}</span>
                           </div>
                         </div>
                         <div className="pt-3 border-t border-white/5 space-y-2">
@@ -952,7 +952,7 @@ const AdminDashboard: React.FC = () => {
                             </td>
                             <td className="py-3 px-4">
                               <p className="text-sm font-bold text-white">{formatDate(b.date)}</p>
-                              <p className="text-xs text-primary-400 font-bold">{b.startHours?.length > 1 ? `${b.startHours.length} Slots: ` : ''} {formatHour(b.startHours[0])} - {formatHour(b.endHour)}</p>
+                              <p className="text-xs text-primary-400 font-bold">{(b.startHours?.length ?? 0) > 1 ? `${b.startHours?.length} Slots: ` : ''} {formatHour(b.startHours?.[0] ?? b.startHour)} - {formatHour(b.endHour ?? b.startHour + 1)}</p>
                             </td>
                             <td className="py-3 px-4">
                               <div className="space-y-1">

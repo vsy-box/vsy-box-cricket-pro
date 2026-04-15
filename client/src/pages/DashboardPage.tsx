@@ -4,7 +4,7 @@ import DatePicker from '../components/DatePicker';
 import SlotGrid from '../components/SlotGrid';
 import BookingModal from '../components/BookingModal';
 import { getSlots } from '../services/api';
-import { getDateRange, getTodayStr, formatDate, isWeekend } from '../utils/helpers';
+import { getDateRange, getTodayStr, isWeekend } from '../utils/helpers';
 import type { SlotInfo, TurfId } from '../types';
 import toast from 'react-hot-toast';
 import { MdRefresh, MdInfo } from 'react-icons/md';

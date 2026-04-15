@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { adminLogin } from '../services/api';
 import toast from 'react-hot-toast';
-import { MdAdminPanelSettings, MdEmail, MdLock, MdArrowForward, MdArrowBack } from 'react-icons/md';
+import { MdEmail, MdLock, MdArrowForward, MdArrowBack } from 'react-icons/md';
 import CricketLoginAnimation from '../components/CricketLoginAnimation';
 
 const AdminLoginPage: React.FC = () => {
