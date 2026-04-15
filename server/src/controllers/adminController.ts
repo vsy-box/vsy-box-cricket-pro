@@ -424,10 +424,10 @@ export const getPricingRules = async (_req: Request, res: Response): Promise<voi
             await PricingRule.create({ turfId, dayType, startHour: 6, endHour: 16, price: dayType === 'weekday' ? 800 : 1000 });
           }
           
-          // Check for Evening Rule (16-24)
+          // Check for Evening Rule (16-23)
           const eveningExists = rules.find(r => r.turfId === turfId && r.dayType === dayType && r.startHour === 16);
           if (!eveningExists) {
-            await PricingRule.create({ turfId, dayType, startHour: 16, endHour: 24, price: dayType === 'weekday' ? 1200 : 1500 });
+            await PricingRule.create({ turfId, dayType, startHour: 16, endHour: 23, price: dayType === 'weekday' ? 1200 : 1500 });
           }
         }
       }

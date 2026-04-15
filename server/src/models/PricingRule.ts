@@ -26,7 +26,7 @@ const pricingRuleSchema = new Schema<PricingRuleDocument>(
       type: Number,
       required: true,
       min: 0,
-      max: 23,
+      max: 24,
     },
     price: {
       type: Number,
