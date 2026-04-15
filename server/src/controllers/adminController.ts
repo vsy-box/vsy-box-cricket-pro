@@ -408,8 +408,10 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
  */
 export const getPricingRules = async (_req: Request, res: Response): Promise<void> => {
   try {
+    let rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
+    
     // Force update if the timings are not the new 6-6 blocks
-    const needsUpdate = rules.length < 8 || rules.some(r => r.endHour !== 18 && r.endHour !== 6);
+    const needsUpdate = rules.length < 8 || rules.some((r: any) => r.endHour !== 18 && r.endHour !== 6);
     
     if (needsUpdate) {
       console.log('🔄 Pricing timings are outdated or missing. Force-repairing rules...');

@@ -26,7 +26,7 @@ export const seedAdmin = async () => {
       const turfs: ('A' | 'B')[] = ['A', 'B'];
       
       // Clear existing if incomplete to avoid duplicates during re-seed
-      if (pricingCount > 0) {
+      if (existingRules.length > 0) {
         await PricingRule.deleteMany({});
       }
       
