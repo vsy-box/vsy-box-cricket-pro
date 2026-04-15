@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdClose, MdDashboard, MdHistory, MdLogout, MdMenu } from 'react-icons/md';
+import { MdClose, MdDashboard, MdHistory, MdLogout, MdMenu, MdLocationOn } from 'react-icons/md';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -58,6 +58,16 @@ const Navbar: React.FC = () => {
                     <MdHistory /> My Bookings
                   </div>
                 </Link>
+                <a
+                  href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-surface-400 hover:text-primary-400 hover:bg-white/5 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-2">
+                    <MdLocationOn /> Locate Area
+                  </div>
+                </a>
               </>
             )}
 
@@ -125,6 +135,16 @@ const Navbar: React.FC = () => {
                       <MdHistory /> My Bookings
                     </div>
                   </Link>
+                  <a
+                    href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-surface-400 hover:text-primary-400 hover:bg-white/5"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MdLocationOn /> Locate Area
+                    </div>
+                  </a>
                 </>
               )}
               <div className="border-t border-white/5 mt-2 pt-2">

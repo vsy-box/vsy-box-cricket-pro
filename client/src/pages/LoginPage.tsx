@@ -208,14 +208,12 @@ const LoginPage: React.FC = () => {
                   {role === 'admin' ? 'Admin Dashboard' : 'Go to Dashboard'} <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
                 </Link>
               ) : (
-                <a
-                  href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center transition-all"
+                <button
+                  onClick={scrollToBooking}
+                  className="btn-primary px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center"
                 >
-                  <MdLocationOn className="text-primary-400" size={22} /> Locate Us
-                </a>
+                  Book a Slot <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
+                </button>
               )}
             </div>
           </div>
@@ -297,6 +295,18 @@ const LoginPage: React.FC = () => {
                   <span className="text-[9px] sm:text-[10px] font-black uppercase text-surface-400">Instant Confirmation</span>
                 </div>
                 <Link to="/admin/login" className="text-[9px] sm:text-[10px] font-black uppercase text-primary-500 hover:text-primary-400 transition-colors">Admin Login</Link>
+              </div>
+
+              {/* Locate Us Button Below Card */}
+              <div className="mt-4">
+                <a
+                  href="https://www.google.com/maps/search/VSY+Box+Cricket+Nadergul"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                >
+                  <MdLocationOn className="text-primary-400" size={18} /> Locate Arena
+                </a>
               </div>
             </div>
           </div>
