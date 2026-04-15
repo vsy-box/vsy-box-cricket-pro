@@ -28,8 +28,12 @@ export interface Booking {
   turfId: TurfId;
   date: string;
   startHour: number;
+  startHours?: number[]; // Added for consolidated bookings
+  endHour?: number;      // Added for consolidated bookings
   totalAmount: number;
+  totalAmountGrouped?: number; // Added for consolidated bookings
   paidAmount: number;
+  paidAmountGrouped?: number;  // Added for consolidated bookings
   paymentType: 'full' | 'advance';
   status: BookingStatus;
   razorpayOrderId: string;
