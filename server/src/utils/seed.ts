@@ -16,11 +16,19 @@ export const seedAdmin = async () => {
       console.log(`✅ Default admin seeded: ${process.env.ADMIN_EMAIL || 'admin@vsyboxcricket.com'}`);
     }
     
-    // Also seed default pricing if empty
+    // Also seed default pricing if empty or incomplete
     const pricingCount = await PricingRule.countDocuments();
-    if (pricingCount === 0) {
+    console.log(`🔍 Current pricing rules count: ${pricingCount}`);
+    
+    if (pricingCount < 8) { // We expect at least 8 rules (2 turfs * 2 dayTypes * 2 timeSlots)
+      console.log('🌱 Seeding default pricing rules...');
       const defaultRules = [];
       const turfs: ('A' | 'B')[] = ['A', 'B'];
+      
+      // Clear existing if incomplete to avoid duplicates during re-seed
+      if (pricingCount > 0) {
+        await PricingRule.deleteMany({});
+      }
       
       for (const turfId of turfs) {
         // Weekday Morning (6 AM - 4 PM)
@@ -34,7 +42,9 @@ export const seedAdmin = async () => {
       }
       
       await PricingRule.insertMany(defaultRules);
-      console.log('✅ Default pricing rules seeded for both turfs');
+      console.log('✅ Default pricing rules seeded successfully for both turfs');
+    } else {
+      console.log('✅ Pricing rules already exist, skipping seed');
     }
   } catch (error) {
     console.error('❌ Seeding failed:', error);
