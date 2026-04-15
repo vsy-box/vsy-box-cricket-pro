@@ -31,14 +31,14 @@ export const seedAdmin = async () => {
       }
       
       for (const turfId of turfs) {
-        // Weekday Morning (6 AM - 4 PM)
-        defaultRules.push({ turfId, dayType: 'weekday', startHour: 6, endHour: 16, price: 800 });
-        // Weekday Evening (4 PM - 12 AM)
-        defaultRules.push({ turfId, dayType: 'weekday', startHour: 16, endHour: 23, price: 1200 });
-        // Weekend Morning (6 AM - 4 PM)
-        defaultRules.push({ turfId, dayType: 'weekend', startHour: 6, endHour: 16, price: 1000 });
-        // Weekend Evening (4 PM - 12 AM)
-        defaultRules.push({ turfId, dayType: 'weekend', startHour: 16, endHour: 23, price: 1500 });
+        // Day (6 AM - 6 PM)
+        defaultRules.push({ turfId, dayType: 'weekday', startHour: 6, endHour: 18, price: 800 });
+        // Night (6 PM - 6 AM)
+        defaultRules.push({ turfId, dayType: 'weekday', startHour: 18, endHour: 6, price: 1200 });
+        // Weekend Day (6 AM - 6 PM)
+        defaultRules.push({ turfId, dayType: 'weekend', startHour: 6, endHour: 18, price: 1000 });
+        // Weekend Night (6 PM - 6 AM)
+        defaultRules.push({ turfId, dayType: 'weekend', startHour: 18, endHour: 6, price: 1500 });
       }
       
       await PricingRule.insertMany(defaultRules);

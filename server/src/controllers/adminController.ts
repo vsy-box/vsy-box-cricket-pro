@@ -418,17 +418,11 @@ export const getPricingRules = async (_req: Request, res: Response): Promise<voi
       
       for (const turfId of turfs) {
         for (const dayType of dayTypes) {
-          // Check for Morning Rule (6-16)
-          const morningExists = rules.find(r => r.turfId === turfId && r.dayType === dayType && r.startHour === 6);
-          if (!morningExists) {
-            await PricingRule.create({ turfId, dayType, startHour: 6, endHour: 16, price: dayType === 'weekday' ? 800 : 1000 });
-          }
+          // Day Rule (6-18)
+          await PricingRule.create({ turfId, dayType, startHour: 6, endHour: 18, price: dayType === 'weekday' ? 800 : 1000 });
           
-          // Check for Evening Rule (16-23)
-          const eveningExists = rules.find(r => r.turfId === turfId && r.dayType === dayType && r.startHour === 16);
-          if (!eveningExists) {
-            await PricingRule.create({ turfId, dayType, startHour: 16, endHour: 23, price: dayType === 'weekday' ? 1200 : 1500 });
-          }
+          // Night Rule (18-6)
+          await PricingRule.create({ turfId, dayType, startHour: 18, endHour: 6, price: dayType === 'weekday' ? 1200 : 1500 });
         }
       }
       // Re-fetch now that they are created
