@@ -1,0 +1,15 @@
+# Root ignores
+node_modules/
+dist/
+.env
+.DS_Store
+
+# Client ignores
+client/node_modules/
+client/dist/
+client/.env
+
+# Server ignores
+server/node_modules/
+server/dist/
+server/.env
