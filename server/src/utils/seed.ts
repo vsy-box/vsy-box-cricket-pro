@@ -16,12 +16,12 @@ export const seedAdmin = async () => {
       console.log(`✅ Default admin seeded: ${process.env.ADMIN_EMAIL || 'admin@vsyboxcricket.com'}`);
     }
     
-    // Also seed default pricing if empty or incomplete
-    const pricingCount = await PricingRule.countDocuments();
-    console.log(`🔍 Current pricing rules count: ${pricingCount}`);
-    
-    if (pricingCount < 8) { // We expect at least 8 rules (2 turfs * 2 dayTypes * 2 timeSlots)
-      console.log('🌱 Seeding default pricing rules...');
+    // Also seed default pricing if empty or outdated
+    const existingRules = await PricingRule.find();
+    const needsUpdate = existingRules.length < 8 || existingRules.some(r => r.endHour !== 18 && r.endHour !== 6);
+
+    if (needsUpdate) {
+      console.log('🌱 Generating/Repairing default pricing rules...');
       const defaultRules = [];
       const turfs: ('A' | 'B')[] = ['A', 'B'];
       
