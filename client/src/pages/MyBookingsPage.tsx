@@ -302,7 +302,22 @@ const MyBookingsPage: React.FC = () => {
                             <p className="text-lg font-black text-white leading-none">{formatCurrency(booking.totalAmountGrouped || 0)}</p>
                           </div>
 
-                          {booking.paidAmountGrouped < booking.totalAmountGrouped ? (
+                          {booking.status === 'pending' ? (
+                            <div className="pl-5 border-l border-white/5">
+                              <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">Payment Status</p>
+                              <p className="text-[10px] font-bold text-amber-400 leading-tight">
+                                ⚠️ Awaiting payment... <br/> Please finish the transaction.
+                              </p>
+                            </div>
+                          ) : booking.status === 'cancelled' ? (
+                            <div className="pl-5 border-l border-white/5">
+                              <p className="text-[9px] font-black text-red-500 uppercase tracking-widest mb-1">Reason</p>
+                              <p className="text-[10px] font-bold text-surface-400 leading-tight">
+                                ❌ Payment failed/timed out. <br/>
+                                <span className="text-[9px] opacity-70">Refunds (if debited) will reflect in 5-7 days.</span>
+                              </p>
+                            </div>
+                          ) : (booking.paidAmountGrouped < booking.totalAmountGrouped) ? (
                             <>
                               <div className="pl-5 border-l border-white/5">
                                 <p className="text-[9px] font-black text-surface-500 uppercase tracking-widest mb-1">Paid Online</p>
