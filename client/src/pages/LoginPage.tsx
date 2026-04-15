@@ -200,20 +200,13 @@ const LoginPage: React.FC = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              {token ? (
+              {token && (
                 <Link
                   to={role === 'admin' ? '/admin' : '/dashboard'}
                   className="btn-primary px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center"
                 >
                   {role === 'admin' ? 'Admin Dashboard' : 'Go to Dashboard'} <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
                 </Link>
-              ) : (
-                <button
-                  onClick={scrollToBooking}
-                  className="btn-primary px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3 group w-full sm:w-auto justify-center"
-                >
-                  Book a Slot <MdArrowForward className="group-hover:translate-x-1 transition-transform" size={20} />
-                </button>
               )}
             </div>
           </div>
