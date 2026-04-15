@@ -408,7 +408,28 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
  */
 export const getPricingRules = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
+    let rules = await PricingRule.find().sort({ turfId: 1, dayType: 1, startHour: 1 });
+    
+    // If no rules exist, create defaults immediately and return them
+    if (rules.length < 8) {
+      const turfs: ('A' | 'B')[] = ['A', 'B'];
+      const defaultRules = [];
+      
+      // Clear if corrupted/incomplete
+      await PricingRule.deleteMany({});
+      
+      for (const turfId of turfs) {
+        defaultRules.push({ turfId, dayType: 'weekday', startHour: 6, endHour: 16, price: 800 });
+        defaultRules.push({ turfId, dayType: 'weekday', startHour: 16, endHour: 24, price: 1200 });
+        defaultRules.push({ turfId, dayType: 'weekend', startHour: 6, endHour: 16, price: 1000 });
+        defaultRules.push({ turfId, dayType: 'weekend', startHour: 16, endHour: 24, price: 1500 });
+      }
+      
+      const seeded = await PricingRule.insertMany(defaultRules);
+      rules = seeded as any;
+      console.log('✅ Pricing rules auto-generated on-demand');
+    }
+    
     res.status(200).json({ success: true, data: rules });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to get rules' });
