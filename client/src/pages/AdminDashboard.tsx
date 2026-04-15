@@ -143,7 +143,7 @@ const AdminDashboard: React.FC = () => {
   const fetchBookings = useCallback(async () => {
     setLoadingBookings(true);
     try {
-      const params: Record<string, string | number> = { page: filterPage, limit: 6 };
+      const params: Record<string, string | number> = { page: filterPage, limit: 24 };
       if (filterDate) params.date = filterDate;
       if (filterTurf) params.turfId = filterTurf;
       if (filterStatus) params.status = filterStatus;
