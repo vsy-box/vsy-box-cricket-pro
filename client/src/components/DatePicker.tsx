@@ -56,10 +56,10 @@ const DatePicker: React.FC<DatePickerProps> = ({ dates, selectedDate, onSelectDa
               key={date}
               onClick={() => onSelectDate(date)}
               className={`flex-shrink-0 flex flex-col items-center justify-between py-2.5 sm:py-4 rounded-xl sm:rounded-2xl
-                border transition-all duration-500 min-w-[60px] sm:min-w-[80px] snap-start
+                border transition-colors duration-150 min-w-[60px] sm:min-w-[80px] snap-start
                 ${
                   isSelected
-                    ? 'bg-primary-600 border-primary-500 text-white shadow-[0_5px_15px_rgba(59,130,246,0.3)] sm:shadow-[0_10px_30px_rgba(59,130,246,0.3)] scale-[1.02] sm:scale-[1.05] z-10'
+                    ? 'bg-primary-600 border-primary-500 text-white shadow-[0_5px_15px_rgba(59,130,246,0.3)] z-10'
                     : weekend
                       ? 'bg-amber-500/5 border-white/5 text-surface-300 hover:bg-amber-500/10 hover:border-amber-500/20'
                       : 'bg-white/5 border-white/5 text-surface-400 hover:bg-white/10 hover:border-white/20'

@@ -21,15 +21,21 @@ export const formatDate = (dateStr: string): string => {
 };
 
 /**
- * Returns today's date in YYYY-MM-DD format.
+ * Returns today's date in YYYY-MM-DD format using LOCAL time (not UTC).
+ * Using toISOString() would return UTC date which is incorrect for IST (+5:30)
+ * users between midnight and 5:30am (UTC would still be the previous day).
  */
 export const getTodayStr = (): string => {
   const now = new Date();
-  return now.toISOString().split('T')[0];
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 /**
  * Generates an array of dates starting from today up to `days` ahead.
+ * Uses local date arithmetic to avoid UTC offset issues.
  */
 export const getDateRange = (days: number): string[] => {
   const dates: string[] = [];
@@ -38,7 +44,10 @@ export const getDateRange = (days: number): string[] => {
   for (let i = 0; i < days; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
-    dates.push(date.toISOString().split('T')[0]);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    dates.push(`${year}-${month}-${day}`);
   }
 
   return dates;

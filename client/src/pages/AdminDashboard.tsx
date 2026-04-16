@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
@@ -88,6 +88,7 @@ const AdminDashboard: React.FC = () => {
   const [filterDate, setFilterDate] = useState(getTodayStr());
   const [filterTurf, setFilterTurf] = useState('');
   const [filterStatus, setFilterStatus] = useState('confirmed');
+  const [filterCompleted, setFilterCompleted] = useState(true); // hide completed by default
   const [filterSearch, setFilterSearch] = useState('');
   const [filterPage, setFilterPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -113,7 +114,9 @@ const AdminDashboard: React.FC = () => {
   const [paymentBookingId, setPaymentBookingId] = useState<string | null>(null);
   const [collectingPayment, setCollectingPayment] = useState(false);
 
-  const dates = getDateRange(14);
+  // Memoize dates so the array reference is stable across renders.
+  // Without this, DatePicker re-mounts every render → double-click needed to select a date.
+  const dates = useMemo(() => getDateRange(14), []);
 
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
@@ -173,19 +176,21 @@ const AdminDashboard: React.FC = () => {
             groups[key].subBookings.push(booking);
           }
         });
-        // Convert to array. We can rely on the existing sort from backend, but since we grouped them, just using values is fine.
-        const grouped = Object.values(groups).sort((a: any, b: any) => {
+        let grouped = Object.values(groups).sort((a: any, b: any) => {
           // Sort by Date first
           if (a.date !== b.date) return a.date.localeCompare(b.date);
-          
           // Then by Start Hour (Ascending: 12am -> 11pm)
           const hourA = a.startHours[0];
           const hourB = b.startHours[0];
           if (hourA !== hourB) return hourA - hourB;
-          
           // Then by Turf ID (A -> B)
           return a.turfId.localeCompare(b.turfId);
         });
+
+        // Strip completed (past confirmed) bookings unless admin explicitly shows them
+        if (filterCompleted) {
+          grouped = grouped.filter((b: any) => !(b.status === 'confirmed' && isPastSlot(b.date, b.endHour ?? b.startHour)));
+        }
 
         setBookings(grouped);
         setTotalPages(res.data.pagination.pages);
@@ -195,7 +200,7 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoadingBookings(false);
     }
-  }, [filterDate, filterTurf, filterStatus, filterSearch, filterPage]);
+  }, [filterDate, filterTurf, filterStatus, filterSearch, filterPage, filterCompleted]);
 
   const fetchSlots = useCallback(async () => {
     setLoadingSlots(true);
@@ -749,14 +754,14 @@ const AdminDashboard: React.FC = () => {
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-bold transition-all ${
-                    (filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed')
+                    (filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted)
                       ? 'bg-primary-500/20 border-primary-500/40 text-primary-400'
                       : 'bg-white/5 border-white/10 text-surface-300'
                   }`}
                 >
                   <MdFilterList size={18} />
                   <span className="hidden sm:inline">Filters</span>
-                  {(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed') && (
+                  {(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted) && (
                     <span className="w-2 h-2 rounded-full bg-primary-400" />
                   )}
                 </button>
@@ -767,7 +772,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-xs font-black uppercase tracking-widest text-surface-400">Filters</p>
                       <button
-                        onClick={() => { setFilterDate(getTodayStr()); setFilterTurf(''); setFilterStatus('confirmed'); setFilterPage(1); setShowFilters(false); }}
+                        onClick={() => { setFilterDate(getTodayStr()); setFilterTurf(''); setFilterStatus('confirmed'); setFilterCompleted(true); setFilterPage(1); setShowFilters(false); }}
                         className="text-[10px] text-primary-400 font-bold hover:text-primary-300"
                       >Reset</button>
                     </div>
@@ -808,6 +813,21 @@ const AdminDashboard: React.FC = () => {
                         <option value="pending">Pending</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
+                    </div>
+
+                    {/* Show/hide completed bookings toggle */}
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="text-[10px] font-bold uppercase text-surface-500">Show Completed</label>
+                      <button
+                        onClick={() => setFilterCompleted(prev => !prev)}
+                        className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none ${
+                          !filterCompleted ? 'bg-primary-500' : 'bg-surface-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
+                          !filterCompleted ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
 
                     <button
