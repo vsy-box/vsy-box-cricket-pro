@@ -88,7 +88,7 @@ const AdminDashboard: React.FC = () => {
   const [filterDate, setFilterDate] = useState(getTodayStr());
   const [filterTurf, setFilterTurf] = useState('');
   const [filterStatus, setFilterStatus] = useState('confirmed');
-  const [filterCompleted, setFilterCompleted] = useState(true); // hide completed by default
+  const [filterCompleted, setFilterCompleted] = useState(false); // show completed by default
   const [filterSearch, setFilterSearch] = useState('');
   const [filterPage, setFilterPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -753,14 +753,14 @@ const AdminDashboard: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-bold transition-all ${(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted)
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-bold transition-all ${(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || filterCompleted)
                     ? 'bg-primary-500/20 border-primary-500/40 text-primary-400'
                     : 'bg-white/5 border-white/10 text-surface-300'
                     }`}
                 >
                   <MdFilterList size={18} />
                   <span className="hidden sm:inline">Filters</span>
-                  {(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted) && (
+                  {(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || filterCompleted) && (
                     <span className="w-2 h-2 rounded-full bg-primary-400" />
                   )}
                 </button>
@@ -771,7 +771,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-xs font-black uppercase tracking-widest text-surface-400">Filters</p>
                       <button
-                        onClick={() => { setFilterDate(getTodayStr()); setFilterTurf(''); setFilterStatus('confirmed'); setFilterCompleted(true); setFilterPage(1); setShowFilters(false); }}
+                        onClick={() => { setFilterDate(getTodayStr()); setFilterTurf(''); setFilterStatus('confirmed'); setFilterCompleted(false); setFilterPage(1); setShowFilters(false); }}
                         className="text-[10px] text-primary-400 font-bold hover:text-primary-300"
                       >Reset</button>
                     </div>
