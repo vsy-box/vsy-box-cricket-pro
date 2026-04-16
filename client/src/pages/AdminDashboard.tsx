@@ -151,7 +151,7 @@ const AdminDashboard: React.FC = () => {
       if (filterTurf) params.turfId = filterTurf;
       if (filterStatus) params.status = filterStatus;
       if (filterSearch) params.search = filterSearch;
-      
+
       const res = await getAdminBookings(params);
       if (res.success && res.data) {
         // Group bookings by razorpayOrderId
@@ -187,9 +187,13 @@ const AdminDashboard: React.FC = () => {
           return a.turfId.localeCompare(b.turfId);
         });
 
-        // Strip completed (past confirmed) bookings unless admin explicitly shows them
+        // Strip completed bookings (both explicitly 'completed' status AND past confirmed slots)
+        // unless the admin explicitly toggles "Show Completed" on.
         if (filterCompleted) {
-          grouped = grouped.filter((b: any) => !(b.status === 'confirmed' && isPastSlot(b.date, b.endHour ?? b.startHour)));
+          grouped = grouped.filter((b: any) =>
+            b.status !== 'completed' &&
+            !(b.status === 'confirmed' && isPastSlot(b.date, b.endHour ?? b.startHour))
+          );
         }
 
         setBookings(grouped);
@@ -237,7 +241,7 @@ const AdminDashboard: React.FC = () => {
 
   // Silently migrate any old walk-in BlockedSlots to real Bookings on first load
   useEffect(() => {
-    migrateWalkIns().catch(() => {/* silent */});
+    migrateWalkIns().catch(() => {/* silent */ });
   }, []);
 
   const handleCancelBooking = (bookingId: string) => {
@@ -249,14 +253,14 @@ const AdminDashboard: React.FC = () => {
     setCancellingBooking(true);
     try {
       const res = await adminCancelBooking(cancelBookingId);
-      if (res.success) { 
-        toast.success('Booking cancelled'); 
-        fetchBookings(); 
-        fetchStats(); 
+      if (res.success) {
+        toast.success('Booking cancelled');
+        fetchBookings();
+        fetchStats();
         setCancelBookingId(null);
       }
-    } catch { 
-      toast.error('Failed to cancel'); 
+    } catch {
+      toast.error('Failed to cancel');
     } finally {
       setCancellingBooking(false);
     }
@@ -271,14 +275,14 @@ const AdminDashboard: React.FC = () => {
     setCollectingPayment(true);
     try {
       const res = await adminCollectPayment(paymentBookingId);
-      if (res.success) { 
-        toast.success('Payment collected'); 
-        fetchBookings(); 
-        fetchStats(); 
+      if (res.success) {
+        toast.success('Payment collected');
+        fetchBookings();
+        fetchStats();
         setPaymentBookingId(null);
       }
-    } catch { 
-      toast.error('Failed to collect payment'); 
+    } catch {
+      toast.error('Failed to collect payment');
     } finally {
       setCollectingPayment(false);
     }
@@ -293,32 +297,32 @@ const AdminDashboard: React.FC = () => {
 
   const handleConfirmBlock = async () => {
     if (blockHour === null) return;
-    
+
     setBlockingInProgress(true);
     try {
       const res = await blockSlotAdmin(
-        selectedTurf, 
-        selectedDate, 
-        blockHour, 
+        selectedTurf,
+        selectedDate,
+        blockHour,
         walkinName ? `Walk-in: ${walkinName}` : 'Admin Block',
         walkinPhone,
         walkinName
       );
-      
-      if (res.success) { 
+
+      if (res.success) {
         if (walkinPhone) {
           toast.success(`✅ Walk-in booking confirmed for ${walkinName || walkinPhone}!`);
         } else {
           toast.success('Slot blocked (maintenance)');
         }
         setShowBlockModal(false);
-        fetchSlots(); 
+        fetchSlots();
         fetchStats();
         fetchBookings();
-      } else { 
-        toast.error(res.message || 'Failed to process'); 
+      } else {
+        toast.error(res.message || 'Failed to process');
       }
-    } catch (err: any) { 
+    } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to process slot');
     } finally {
       setBlockingInProgress(false);
@@ -328,9 +332,9 @@ const AdminDashboard: React.FC = () => {
   const handleUnblockSlot = async (hour: number, date?: string, turf?: TurfId) => {
     try {
       const res = await unblockSlotAdmin(turf || selectedTurf, date || selectedDate, hour);
-      if (res.success) { 
-        toast.success('Slot unblocked'); 
-        fetchSlots(); 
+      if (res.success) {
+        toast.success('Slot unblocked');
+        fetchSlots();
         if (activeTab === 'bookings') fetchBookings();
       }
     } catch { toast.error('Failed to unblock'); }
@@ -344,10 +348,10 @@ const AdminDashboard: React.FC = () => {
       const res = await updatePricingRule(editingRule._id, price, editingRule.isActive);
       if (res.success) { toast.success('Price updated'); setEditingRule(null); fetchPricing(); }
       else { toast.error(res.message || 'Failed to update'); }
-    } catch (error: any) { 
+    } catch (error: any) {
       console.error(error);
       const msg = error?.response?.data?.message || 'Failed to update';
-      toast.error(msg); 
+      toast.error(msg);
     }
   };
 
@@ -369,11 +373,11 @@ const AdminDashboard: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-display font-black text-white">
             Admin <span className="gradient-text">Dashboard</span>
           </h1>
-          
+
           {/* Scrolling Marquee for Bookings */}
           {stats && (
             <div className="w-full overflow-hidden bg-white/5 border border-white/10 rounded-lg py-2 flex flex-col justify-center gap-1.5 relative h-16 sm:h-16 shadow-inner">
-              
+
               {/* CURRENTLY RUNNING Ticker */}
               <div className="w-full relative h-[1.2rem] sm:h-[1.4rem]">
                 <div className="absolute whitespace-nowrap animate-shimmer flex items-center h-full text-xs sm:text-sm font-bold text-surface-300" style={{ animationDuration: '16s' }}>
@@ -384,7 +388,7 @@ const AdminDashboard: React.FC = () => {
                       ...(stats.upcomingBookings || []),
                       ...(stats.recentBookings || [])
                     ].filter(b => b.date === today && b.startHour === currentHour && b.status === 'confirmed');
-                    
+
                     const uniqueRunning = Array.from(new Map(running.map(b => [b._id, b])).values());
 
                     return (
@@ -427,7 +431,7 @@ const AdminDashboard: React.FC = () => {
                     const nextBookings = [
                       ...(stats.upcomingBookings || [])
                     ].filter(b => b.date === nextDs && b.startHour === searchHour && b.status === 'confirmed');
-                    
+
                     const uniqueNext = Array.from(new Map(nextBookings.map(b => [b._id, b])).values());
 
                     return (
@@ -474,11 +478,10 @@ const AdminDashboard: React.FC = () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                activeTab === tab.key
-                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                  : 'bg-white/5 text-surface-400 border border-white/5 hover:bg-white/10'
-              }`}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${activeTab === tab.key
+                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                : 'bg-white/5 text-surface-400 border border-white/5 hover:bg-white/10'
+                }`}
             >
               {tab.icon} {tab.label}
             </button>
@@ -499,8 +502,8 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
                   <div className="flex flex-wrap items-center gap-2">
                     <label className="text-[10px] sm:text-xs font-bold text-surface-400 uppercase tracking-widest">Filter:</label>
-                    <select 
-                      value={statsMonth} 
+                    <select
+                      value={statsMonth}
                       onChange={(e) => { setStatsMonth(e.target.value); setStatsDay(''); }}
                       disabled={statsShowAll}
                       className="bg-surface-900 border border-white/10 text-white text-xs rounded-lg px-2 py-1 outline-none disabled:opacity-50"
@@ -509,8 +512,8 @@ const AdminDashboard: React.FC = () => {
                         <option key={m} value={String(m)}>{new Date(2000, m - 1).toLocaleString('default', { month: 'short' })}</option>
                       ))}
                     </select>
-                    <select 
-                      value={statsYear} 
+                    <select
+                      value={statsYear}
                       onChange={(e) => { setStatsYear(e.target.value); setStatsDay(''); }}
                       disabled={statsShowAll}
                       className="bg-surface-900 border border-white/10 text-white text-xs rounded-lg px-2 py-1 outline-none disabled:opacity-50"
@@ -529,21 +532,20 @@ const AdminDashboard: React.FC = () => {
                     >
                       <option value="">All Days</option>
                       {Array.from(
-                        { length: new Date(Number(statsYear), Number(statsMonth), 0).getDate() }, 
+                        { length: new Date(Number(statsYear), Number(statsMonth), 0).getDate() },
                         (_, i) => i + 1
                       ).map(d => (
                         <option key={d} value={String(d)}>Day {d}</option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <button
                     onClick={() => setStatsShowAll(!statsShowAll)}
-                    className={`flex items-center justify-center px-4 py-1.5 rounded-lg border transition-all duration-300 sm:w-auto w-full text-[10px] sm:text-xs font-black uppercase tracking-widest focus:outline-none ${
-                       statsShowAll 
-                         ? 'bg-primary-500/20 text-primary-400 border-primary-500/50 shadow-[0_0_15px_rgba(34,197,94,0.15)]' 
-                         : 'bg-white/5 hover:bg-white/10 text-surface-300 hover:text-white border-white/5'
-                    }`}
+                    className={`flex items-center justify-center px-4 py-1.5 rounded-lg border transition-all duration-300 sm:w-auto w-full text-[10px] sm:text-xs font-black uppercase tracking-widest focus:outline-none ${statsShowAll
+                      ? 'bg-primary-500/20 text-primary-400 border-primary-500/50 shadow-[0_0_15px_rgba(34,197,94,0.15)]'
+                      : 'bg-white/5 hover:bg-white/10 text-surface-300 hover:text-white border-white/5'
+                      }`}
                   >
                     {statsShowAll ? 'Showing All-Time' : 'Show All-Time'}
                   </button>
@@ -551,13 +553,13 @@ const AdminDashboard: React.FC = () => {
 
                 {/* Stats Grid Redesigned */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                  
+
                   <div className="md:col-span-2 lg:col-span-4 relative group rounded-3xl p-6 sm:p-8 border border-green-500/20 bg-gradient-to-br from-green-500/10 via-transparent to-transparent">
                     {/* Background Clipping Container */}
                     <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                       <div className="absolute -right-10 -top-10 w-40 h-40 bg-green-500/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
+                      <div className="absolute -right-10 -top-10 w-40 h-40 bg-green-500/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
                     </div>
-                    
+
                     <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                       <div className="flex items-center gap-5">
                         <div className="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-400 shadow-lg shadow-green-500/20">
@@ -571,31 +573,31 @@ const AdminDashboard: React.FC = () => {
 
                       <div className="flex flex-wrap gap-4 sm:gap-8">
                         <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/5">
-                           <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">Online</p>
-                           <p className="text-xl font-black text-primary-400">{formatCurrency(stats.onlineRevenue ?? 0)}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">Online</p>
+                          <p className="text-xl font-black text-primary-400">{formatCurrency(stats.onlineRevenue ?? 0)}</p>
                         </div>
                         <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/5">
-                           <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">Cash/Walk-in</p>
-                           <p className="text-xl font-black text-amber-500">{formatCurrency(stats.walkinRevenue ?? 0)}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">Cash/Walk-in</p>
+                          <p className="text-xl font-black text-amber-500">{formatCurrency(stats.walkinRevenue ?? 0)}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                       <div className="flex gap-4">
-                          <span className="flex items-center gap-1.5 text-xs font-bold text-surface-400">
-                             <span className="w-2 h-2 rounded-full bg-green-500" /> {stats.confirmedBookings ?? 0} Completed Sessions
-                          </span>
-                       </div>
-                       
-                       <div className="relative">
-                        <button 
-                          onClick={() => setShowUpcoming(!showUpcoming)} 
+                      <div className="flex gap-4">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-surface-400">
+                          <span className="w-2 h-2 rounded-full bg-green-500" /> {stats.confirmedBookings ?? 0} Completed Sessions
+                        </span>
+                      </div>
+
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowUpcoming(!showUpcoming)}
                           className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] uppercase tracking-widest font-black text-white transition-all active:scale-95"
                         >
                           Upcoming ▾
                         </button>
-                        
+
                         {showUpcoming && (
                           <div className="absolute right-0 top-full mt-3 w-72 sm:w-80 bg-surface-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in">
                             <div className="px-4 py-3 bg-white/5 border-b border-white/10">
@@ -640,22 +642,21 @@ const AdminDashboard: React.FC = () => {
                     { label: 'Turf B Income', value: (stats.revenueByTurf ?? []).find(t => t._id === 'B')?.total ?? 0, icon: <MdSportsCricket size={24} />, color: 'accent', sub: `${(stats.revenueByTurf ?? []).find(t => t._id === 'B')?.count ?? 0} Games` },
                   ].map((stat, idx) => (
                     <div key={idx} className={`group relative overflow-hidden rounded-3xl p-6 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300`}>
-                       <div className="relative z-10 flex flex-col gap-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                            stat.color === 'primary' ? 'bg-primary-500/20 text-primary-400' : 
-                            stat.color === 'accent' ? 'bg-accent-500/20 text-accent-400' :
+                      <div className="relative z-10 flex flex-col gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${stat.color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
+                          stat.color === 'accent' ? 'bg-accent-500/20 text-accent-400' :
                             stat.color === 'purple' ? 'bg-purple-500/20 text-purple-400' : 'bg-white/10'
                           }`}>
-                            {stat.icon}
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">{stat.label}</p>
-                            <h4 className="text-2xl font-black text-white">
-                              {typeof stat.value === 'number' && stat.label.includes('Income') ? formatCurrency(stat.value) : stat.value}
-                            </h4>
-                            <p className="text-[10px] text-surface-600 font-bold mt-1">{stat.sub}</p>
-                          </div>
-                       </div>
+                          {stat.icon}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-surface-500 mb-1">{stat.label}</p>
+                          <h4 className="text-2xl font-black text-white">
+                            {typeof stat.value === 'number' && stat.label.includes('Income') ? formatCurrency(stat.value) : stat.value}
+                          </h4>
+                          <p className="text-[10px] text-surface-600 font-bold mt-1">{stat.sub}</p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -692,9 +693,8 @@ const AdminDashboard: React.FC = () => {
                         const user = typeof booking.userId === 'object' ? booking.userId : null;
                         return (
                           <div key={booking._id} className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-xl border border-white/5">
-                            <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              booking.turfId === 'A' ? 'bg-primary-500/15 text-primary-400' : 'bg-accent-500/15 text-accent-400'
-                            }`}>
+                            <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center flex-shrink-0 ${booking.turfId === 'A' ? 'bg-primary-500/15 text-primary-400' : 'bg-accent-500/15 text-accent-400'
+                              }`}>
                               <MdSportsCricket size={18} />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -753,11 +753,10 @@ const AdminDashboard: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-bold transition-all ${
-                    (filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted)
-                      ? 'bg-primary-500/20 border-primary-500/40 text-primary-400'
-                      : 'bg-white/5 border-white/10 text-surface-300'
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-bold transition-all ${(filterDate !== getTodayStr() || filterTurf || filterStatus !== 'confirmed' || !filterCompleted)
+                    ? 'bg-primary-500/20 border-primary-500/40 text-primary-400'
+                    : 'bg-white/5 border-white/10 text-surface-300'
+                    }`}
                 >
                   <MdFilterList size={18} />
                   <span className="hidden sm:inline">Filters</span>
@@ -820,13 +819,11 @@ const AdminDashboard: React.FC = () => {
                       <label className="text-[10px] font-bold uppercase text-surface-500">Show Completed</label>
                       <button
                         onClick={() => setFilterCompleted(prev => !prev)}
-                        className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none ${
-                          !filterCompleted ? 'bg-primary-500' : 'bg-surface-700'
-                        }`}
+                        className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none ${!filterCompleted ? 'bg-primary-500' : 'bg-surface-700'
+                          }`}
                       >
-                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
-                          !filterCompleted ? 'translate-x-5' : 'translate-x-0'
-                        }`} />
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${!filterCompleted ? 'translate-x-5' : 'translate-x-0'
+                          }`} />
                       </button>
                     </div>
 
@@ -874,14 +871,13 @@ const AdminDashboard: React.FC = () => {
                               </div>
                             )}
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${
-                            b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'bg-primary-500/15 text-primary-400 border-primary-500/20'
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'bg-primary-500/15 text-primary-400 border-primary-500/20'
                             : b.status === 'confirmed' ? 'bg-green-500/15 text-green-400 border-green-500/20'
-                            : b.status === 'blocked' ? 'bg-red-500/15 text-red-300 border-red-500/20'
-                            : b.status === 'cancelled' ? 'bg-red-500/15 text-red-400 border-red-500/20'
-                            : b.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                            : 'bg-surface-500/15 text-surface-400 border-surface-500/20'
-                          }`}>{b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'COMPLETED' : b.status}</span>
+                              : b.status === 'blocked' ? 'bg-red-500/15 text-red-300 border-red-500/20'
+                                : b.status === 'cancelled' ? 'bg-red-500/15 text-red-400 border-red-500/20'
+                                  : b.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                                    : 'bg-surface-500/15 text-surface-400 border-surface-500/20'
+                            }`}>{b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'COMPLETED' : b.status}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
@@ -986,14 +982,13 @@ const AdminDashboard: React.FC = () => {
                               </div>
                             </td>
                             <td className="py-3 px-4">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                                b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'bg-primary-500/15 text-primary-400 border-primary-500/20'
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'bg-primary-500/15 text-primary-400 border-primary-500/20'
                                 : b.status === 'confirmed' ? 'bg-green-500/15 text-green-400 border-green-500/20'
-                                : b.status === 'blocked' ? 'bg-red-500/15 text-red-300 border-red-500/20'
-                                : b.status === 'cancelled' ? 'bg-red-500/15 text-red-400 border-red-500/20'
-                                : b.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                                : 'bg-surface-500/15 text-surface-400 border-surface-500/20'
-                              }`}>{b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'COMPLETED' : b.status}</span>
+                                  : b.status === 'blocked' ? 'bg-red-500/15 text-red-300 border-red-500/20'
+                                    : b.status === 'cancelled' ? 'bg-red-500/15 text-red-400 border-red-500/20'
+                                      : b.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                                        : 'bg-surface-500/15 text-surface-400 border-surface-500/20'
+                                }`}>{b.status === 'confirmed' && isPastSlot(b.date, b.startHour) ? 'COMPLETED' : b.status}</span>
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex gap-2">
@@ -1055,9 +1050,8 @@ const AdminDashboard: React.FC = () => {
             <div className="flex gap-2">
               {(['A', 'B'] as TurfId[]).map((t) => (
                 <button key={t} onClick={() => setSelectedTurf(t)}
-                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
-                    selectedTurf === t ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'bg-white/5 text-surface-400 border border-white/5'
-                  }`}>Turf {t}</button>
+                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${selectedTurf === t ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'bg-white/5 text-surface-400 border border-white/5'
+                    }`}>Turf {t}</button>
               ))}
             </div>
 
@@ -1069,14 +1063,13 @@ const AdminDashboard: React.FC = () => {
                   const today = getTodayStr();
                   const currentHour = new Date().getHours();
                   const displaySlots = selectedDate === today ? slots.filter(s => s.hour > currentHour) : slots;
-                  
+
                   return displaySlots.map((slot) => (
                     <div key={slot.hour}
-                      className={`flex flex-col items-center p-2 sm:p-3 rounded-xl border transition-all min-h-[80px] sm:min-h-[100px] ${
-                        slot.status === 'blocked' ? 'bg-surface-700/50 border-surface-600/30'
+                      className={`flex flex-col items-center p-2 sm:p-3 rounded-xl border transition-all min-h-[80px] sm:min-h-[100px] ${slot.status === 'blocked' ? 'bg-surface-700/50 border-surface-600/30'
                         : slot.status === 'booked' ? 'bg-primary-500/10 border-primary-500/20 opacity-60'
-                        : 'bg-white/5 border-white/5 hover:border-primary-500/30'
-                      }`}>
+                          : 'bg-white/5 border-white/5 hover:border-primary-500/30'
+                        }`}>
                       <span className="text-[10px] sm:text-xs font-black text-surface-400 mb-1 sm:mb-2">{formatHour(slot.hour)}</span>
                       <span className={`text-[9px] sm:text-[10px] font-bold uppercase mb-2 sm:mb-3 ${slot.status === 'available' ? 'text-green-400' : 'text-surface-500'}`}>{slot.status}</span>
                       {slot.status === 'available' && (
@@ -1116,12 +1109,11 @@ const AdminDashboard: React.FC = () => {
             <div className="flex gap-2 mb-4">
               {(['A', 'B'] as TurfId[]).map((t) => (
                 <button key={t} onClick={() => setSelectedTurf(t)}
-                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase transition-all ${
-                    selectedTurf === t ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30 ring-1 ring-primary-500/50' : 'bg-white/5 text-surface-400 border border-white/5 hover:bg-white/10'
-                  }`}>Turf {t}</button>
+                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase transition-all ${selectedTurf === t ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30 ring-1 ring-primary-500/50' : 'bg-white/5 text-surface-400 border border-white/5 hover:bg-white/10'
+                    }`}>Turf {t}</button>
               ))}
             </div>
-            
+
             {loadingPricing ? (
               <div className="flex justify-center py-12"><LoadingSpinner text="Loading pricing..." /></div>
             ) : (
@@ -1172,19 +1164,19 @@ const AdminDashboard: React.FC = () => {
 
             {/* Info banner */}
             <div className={`p-3 rounded-xl border text-xs font-medium transition-all duration-300 ${walkinPhone ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
-              {walkinPhone 
+              {walkinPhone
                 ? '✅ Walk-in Booking — A confirmed booking will be created and linked to this customer\'s account.'
                 : '⚠️ No phone entered — This will be saved as a maintenance block only.'}
             </div>
-            
+
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-black text-surface-500 uppercase tracking-widest mb-1.5">
                   Customer Phone <span className="text-primary-400 normal-case font-medium">(for walk-in booking)</span>
                 </label>
-                <input 
-                  type="tel" 
-                  value={walkinPhone} 
+                <input
+                  type="tel"
+                  value={walkinPhone}
                   onChange={(e) => setWalkinPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   placeholder="10-digit phone number"
                   className="input-field"
@@ -1192,9 +1184,9 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-black text-surface-500 uppercase tracking-widest mb-1.5">Customer Name <span className="text-surface-600 normal-case font-medium">(optional)</span></label>
-                <input 
-                  type="text" 
-                  value={walkinName} 
+                <input
+                  type="text"
+                  value={walkinName}
                   onChange={(e) => setWalkinName(e.target.value)}
                   placeholder="Enter name"
                   className="input-field"
@@ -1203,14 +1195,14 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button 
-                onClick={() => setShowBlockModal(false)} 
+              <button
+                onClick={() => setShowBlockModal(false)}
                 disabled={blockingInProgress}
                 className="btn-secondary flex-1"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleConfirmBlock}
                 disabled={blockingInProgress}
                 className={`flex-1 px-4 py-2.5 rounded-xl font-black text-sm transition-all duration-200 ${walkinPhone ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-surface-700 hover:bg-surface-600 text-white'}`}
@@ -1221,85 +1213,85 @@ const AdminDashboard: React.FC = () => {
           </div>
         </Modal>
 
-      {/* Cancel Booking Modal */}
-      <Modal 
-        isOpen={!!cancelBookingId} 
-        onClose={() => !cancellingBooking && setCancelBookingId(null)}
-        title="Cancel Booking"
-      >
-        <div className="text-center p-2 sm:p-4">
-          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-lg shadow-red-500/5">
-            <MdClose size={32} />
-          </div>
-          
-          <h3 className="text-2xl font-display font-black text-white mb-2">Are you sure?</h3>
-          <p className="text-surface-400 text-sm mb-8 leading-relaxed">
-            This will permanently cancel the booking and release the slots back to the public. This action cannot be undone.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setCancelBookingId(null)}
-              disabled={cancellingBooking}
-              className="flex-1 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all disabled:opacity-50"
-            >
-              Keep Booking
-            </button>
-            <button
-              onClick={confirmCancellation}
-              disabled={cancellingBooking}
-              className="flex-1 px-6 py-3.5 rounded-xl bg-red-600 text-white font-black uppercase tracking-widest text-[11px] hover:bg-red-500 shadow-lg shadow-red-600/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {cancellingBooking ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Cancelling...
-                </>
-              ) : 'Yes, Cancel Booking'}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        {/* Cancel Booking Modal */}
+        <Modal
+          isOpen={!!cancelBookingId}
+          onClose={() => !cancellingBooking && setCancelBookingId(null)}
+          title="Cancel Booking"
+        >
+          <div className="text-center p-2 sm:p-4">
+            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-lg shadow-red-500/5">
+              <MdClose size={32} />
+            </div>
 
-      {/* Collect Payment Modal */}
-      <Modal 
-        isOpen={!!paymentBookingId} 
-        onClose={() => !collectingPayment && setPaymentBookingId(null)}
-        title="Payment Collection"
-      >
-        <div className="text-center p-2 sm:p-4">
-          <div className="w-16 h-16 bg-green-500/10 text-green-400 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-lg shadow-green-500/5">
-            <MdCurrencyRupee size={32} />
+            <h3 className="text-2xl font-display font-black text-white mb-2">Are you sure?</h3>
+            <p className="text-surface-400 text-sm mb-8 leading-relaxed">
+              This will permanently cancel the booking and release the slots back to the public. This action cannot be undone.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setCancelBookingId(null)}
+                disabled={cancellingBooking}
+                className="flex-1 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all disabled:opacity-50"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={confirmCancellation}
+                disabled={cancellingBooking}
+                className="flex-1 px-6 py-3.5 rounded-xl bg-red-600 text-white font-black uppercase tracking-widest text-[11px] hover:bg-red-500 shadow-lg shadow-red-600/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {cancellingBooking ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Cancelling...
+                  </>
+                ) : 'Yes, Cancel Booking'}
+              </button>
+            </div>
           </div>
-          
-          <h3 className="text-2xl font-display font-black text-white mb-2">Mark as Collected?</h3>
-          <p className="text-surface-400 text-sm mb-8 leading-relaxed">
-            Confirm that the pending balance has been collected in cash at the turf. This will update the booking status to fully paid.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setPaymentBookingId(null)}
-              disabled={collectingPayment}
-              className="flex-1 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmCollection}
-              disabled={collectingPayment}
-              className="flex-1 px-6 py-3.5 rounded-xl bg-green-500 text-black font-black uppercase tracking-widest text-[11px] hover:bg-green-400 shadow-lg shadow-green-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {collectingPayment ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Processing...
-                </>
-              ) : 'Confirm Cash Collection'}
-            </button>
+        </Modal>
+
+        {/* Collect Payment Modal */}
+        <Modal
+          isOpen={!!paymentBookingId}
+          onClose={() => !collectingPayment && setPaymentBookingId(null)}
+          title="Payment Collection"
+        >
+          <div className="text-center p-2 sm:p-4">
+            <div className="w-16 h-16 bg-green-500/10 text-green-400 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-lg shadow-green-500/5">
+              <MdCurrencyRupee size={32} />
+            </div>
+
+            <h3 className="text-2xl font-display font-black text-white mb-2">Mark as Collected?</h3>
+            <p className="text-surface-400 text-sm mb-8 leading-relaxed">
+              Confirm that the pending balance has been collected in cash at the turf. This will update the booking status to fully paid.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setPaymentBookingId(null)}
+                disabled={collectingPayment}
+                className="flex-1 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmCollection}
+                disabled={collectingPayment}
+                className="flex-1 px-6 py-3.5 rounded-xl bg-green-500 text-black font-black uppercase tracking-widest text-[11px] hover:bg-green-400 shadow-lg shadow-green-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {collectingPayment ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : 'Confirm Cash Collection'}
+              </button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
 
       </main>
     </div>

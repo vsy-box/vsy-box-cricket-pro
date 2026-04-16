@@ -44,6 +44,7 @@ export interface Booking {
   reason?: string;
   phoneNumber?: string;
   customerName?: string;
+  subBookings?: Booking[];
 }
 
 export interface PricingRule {
